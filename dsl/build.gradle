@@ -1,0 +1,114 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
+
+def libraries = rootProject.ext.dependencies
+
+android {
+    compileSdkVersion Integer.parseInt("$rootProject.android.compileSdkVer")
+
+    defaultConfig {
+        minSdkVersion 15
+        targetSdkVersion Integer.parseInt("$rootProject.android.targetSdkVer")
+        versionCode Integer.parseInt("$rootProject.android.versionCode")
+        versionName "$rootProject.android.versionName"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(':model')
+
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$libraries.kotlinVersion"
+}
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-android-extensions:$rootProject.ext.dependencies.kotlinVersion"
+    }
+}
+
+version = "$rootProject.android.versionName"
+def siteUrl = 'https://github.com/V2Ray-Android/V2Ray-Protobuf-Android'
+def gitUrl = 'https://github.com/V2Ray-Android/V2Ray-Protobuf-Android.git'
+group = "com.v2ray.android.protobuf"
+install {
+    repositories.mavenInstaller {
+        // This generates POM.xml with proper parameters
+        pom.project {
+            artifactId "dsl"
+            packaging 'aar'
+            // Add your description here
+            name 'DSL builder for V2Ray Protobuf-lite models'
+            url siteUrl
+            // Set your license
+            licenses {
+                license {
+                    name 'GNU GENERAL PUBLIC LICENSE, Version 3'
+                    url 'https://www.gnu.org/licenses/gpl-3.0.txt'
+                }
+            }
+            developers {
+                developer {
+                    id 'liberal-boy'
+                    name 'Liberal Boy'
+                    email 'liberal-boy@protonmail.com'
+                }
+            }
+            scm {
+                connection gitUrl
+                developerConnection gitUrl
+                url siteUrl
+            }
+        }
+    }
+}
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+artifacts {
+    // archives javadocJar
+    archives sourcesJar
+}
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+bintray {
+    user = properties.getProperty("bintray.user")
+    key = properties.getProperty("bintray.apikey")
+    configurations = ['archives']
+    pkg {
+        repo = "maven"
+        name = "V2Ray-Protobuf-Android"
+        websiteUrl = siteUrl
+        vcsUrl = gitUrl
+        licenses = ["GPL-3.0"]
+        publish = true
+    }
+}

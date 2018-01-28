@@ -1,0 +1,16 @@
+ext {
+    android = [
+            buildToolsVer: '27.0.3',
+            compileSdkVer: '27',
+            targetSdkVer : '27',
+            versionCode : '2',
+            versionName : '0.1.1'
+    ]
+    dependencies = [
+            ankoVersion      : '0.10.3',
+            kotlinVersion    : '1.2.21',
+            supportLibVersion: '27.0.2',
+            firebaseVersion  : '11.8.0',
+            protobuf_version : '3.0.0'
+    ]
+}
